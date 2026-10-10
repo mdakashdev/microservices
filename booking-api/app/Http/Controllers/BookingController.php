@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
+    public function index()
+    {
+        $booking = Booking::latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'bookings' => $booking
+        ]);
+    }
+    
     public function store(BookingRequest $request)
     {
         $data = $request->validated();
