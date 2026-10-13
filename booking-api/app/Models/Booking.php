@@ -9,6 +9,7 @@ class Booking extends Model
     protected $fillable = [
         'customer_name',
         'service',
-        'status'
+        'status',
+        'idempotency_key'
     ];
 }
