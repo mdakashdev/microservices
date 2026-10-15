@@ -70,15 +70,27 @@ class BookingController extends Controller
         $notificationSent = false;
 
         try {
-            $response = Http::timeout(3)->post(
-                'http://127.0.0.1:3001/notifications',
-                [
-                    'bookingId' => $booking->id,
-                    'message' => "New booking created for {$booking->customer_name}",
-                ]
-            );
+            $response = Http::retry(
+                3,
+                500,
+                 function (\Exception $exception, $request) {
+                    logger()->warning('Notification request retrying', [
+                        'error' => $exception->getMessage(),
+                    ]);
+
+                    return true;
+                 })
+                ->timeout(3)
+                ->post(
+                    'http://127.0.0.1:3001/notifications',
+                    [
+                        'bookingId' => $booking->id,
+                        'message' => "New booking created for {$booking->customer_name}",
+                    ]
+                 );
 
             $notificationSent = $response->successful();
+
         } catch (ConnectionException $e) {
             report($e);
         }
